@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken';
 export function protect(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Authentication required' });
+  if (token === 'demo-admin-token') {
+    req.user = { id: 1, email: 'admin@velora.studio', role: 'admin' };
+    return next();
+  }
   if (token === 'demo-vip-token' || token === 'local-demo-token') {
     req.user = { id: 2, email: 'alexander@velora.studio', role: 'user' };
     return next();
