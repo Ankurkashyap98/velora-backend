@@ -11,17 +11,20 @@ dotenv.config();
 const app = express();
 app.set('trust proxy', 1);
 
-const allowedOrigins = process.env.CORS_ORIGINS
+const envOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
-  : '*';
+  : [];
 
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins === '*' || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+    if (envOrigins.includes('*') || envOrigins.length === 0 || envOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error(`CORS origin ${origin} not allowed`));
+    if (/^https:\/\/velora-.*\.vercel\.app$/.test(origin) || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
   },
   credentials: true
 }));
